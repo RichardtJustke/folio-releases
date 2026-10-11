@@ -12,8 +12,9 @@ curl -fsSL https://raw.githubusercontent.com/RichardtJustke/folio-releases/main/
 Instala em `~/.local/bin/folio` (sem root), cria a entrada no menu de aplicativos e confere o checksum do download.
 Requer Linux x86_64 e `curl`.
 
-- Versão específica: `FOLIO_VERSION=0.4 sh install.sh`
-- Desinstalar: `sh install.sh --uninstall`
+- Atualizar: rode o mesmo comando de novo (ele mostra `0.4 → 0.5`).
+- Versão específica: `curl -fsSL .../install.sh | FOLIO_VERSION=0.4 sh`
+- Desinstalar: `curl -fsSL .../install.sh | sh -s -- --uninstall`
 
 ## Dicas
 
