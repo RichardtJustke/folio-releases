@@ -35,10 +35,16 @@ need curl
 need sha256sum
 
 if [ -n "${FOLIO_VERSION:-}" ]; then
-    base="https://github.com/$REPO/releases/download/v${FOLIO_VERSION}-alpha"
+    tag="v${FOLIO_VERSION}-alpha"
 else
-    base="https://github.com/$REPO/releases/latest/download"
+    # a URL /releases/latest redireciona para /releases/tag/<tag>
+    tag="$(curl -fsSIL -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest" | sed 's|.*/tag/||')"
+    case "$tag" in
+        ""|*/*|*" "*) die "não encontrei nenhuma versão publicada em $REPO" ;;
+    esac
 fi
+base="https://github.com/$REPO/releases/download/$tag"
+say "Versão: $tag"
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT INT TERM
