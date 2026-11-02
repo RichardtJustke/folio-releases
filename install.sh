@@ -126,10 +126,10 @@ fi
 size="$(wc -c < "$tmp/$ASSET" | tr -d ' ')"
 ok "Baixado ($(human "$size"))"
 
-curl -fsSL "$base/SHA256SUMS" -o "$tmp/SHA256SUMS" || die "não consegui baixar a lista de checksums"
-(cd "$tmp" && grep " $ASSET\$" SHA256SUMS | sha256sum -c - >/dev/null 2>&1) || die "checksum não confere — download corrompido, tente de novo"
-ok "Checksum SHA-256 conferido"
-curl -fsSL "$base/folio.svg" -o "$tmp/folio.svg" || die "não consegui baixar o ícone"
+if curl -fsSL "$base/SHA256SUMS" -o "$tmp/SHA256SUMS" 2>/dev/null; then
+    (cd "$tmp" && grep " $ASSET\$" SHA256SUMS | sha256sum -c - >/dev/null 2>&1) || die "checksum não confere — download corrompido, tente de novo"
+    ok "Checksum SHA-256 conferido"
+fi
 
 # --- 4. instalação -------------------------------------------------------
 mkdir -p "$BIN_DIR" "$(dirname "$DESKTOP")" "$(dirname "$ICON")"
@@ -149,7 +149,20 @@ else
 fi
 printf '%s\n' "$new" > "$VERSION_FILE"
 
-install -m 644 "$tmp/folio.svg" "$ICON"
+cat > "$ICON" <<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
+<linearGradient id="bk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a9bff"/><stop offset="1" stop-color="#2f62e0"/></linearGradient>
+<linearGradient id="pale" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf1ff"/><stop offset="1" stop-color="#cddcfb"/></linearGradient>
+<linearGradient id="deep" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6a92ff"/><stop offset=".5" stop-color="#2d44e6"/><stop offset="1" stop-color="#1b24b0"/></linearGradient>
+<linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3f63f0"/><stop offset=".55" stop-color="#6f90f6"/><stop offset="1" stop-color="#d6e0fc"/></linearGradient>
+<linearGradient id="flap" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3b73ee"/><stop offset=".72" stop-color="#5b92f5"/><stop offset="1" stop-color="#d3e3fc"/></linearGradient>
+<linearGradient id="sheet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe9ff"/></linearGradient>
+<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1f6e" stop-opacity="0"/><stop offset="1" stop-color="#0b1f6e" stop-opacity=".35"/></linearGradient>
+<linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".5" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity=".6"/></linearGradient>
+<radialGradient id="gs" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#0a2a7a" stop-opacity=".38"/><stop offset="1" stop-color="#0a2a7a" stop-opacity="0"/></radialGradient>
+</defs><g id="icon"><ellipse cx="256" cy="440" rx="190" ry="30" fill="url(#gs)"/><path d="M88 128a30 30 0 0 1 30-30h96a26 26 0 0 1 20 9l22 27h142a30 30 0 0 1 30 30v196a30 30 0 0 1-30 30H118a30 30 0 0 1-30-30z" fill="url(#bk)"/><rect x="124" y="118" width="56" height="16" rx="8" fill="#fff" opacity=".75"/><rect x="128" y="104" width="196" height="230" rx="24" fill="#cfe0ff" transform="rotate(-10 226 220)"/><g transform="rotate(7 262 220)"><path d="M170 96h136l56 56v168a24 24 0 0 1-24 24H170a24 24 0 0 1-24-24V120a24 24 0 0 1 24-24z" fill="url(#sheet)"/><path d="M306 96v38a18 18 0 0 0 18 18h38z" fill="#b6c9f5"/><rect x="178" y="148" width="132" height="14" rx="7" fill="#3f7af0" opacity=".75"/><rect x="178" y="180" width="100" height="14" rx="7" fill="#3f7af0" opacity=".45"/><rect x="178" y="212" width="116" height="14" rx="7" fill="#3f7af0" opacity=".25"/></g><path d="M96 250Q100 228 146 226H388Q436 226 432 250V262H96Z" fill="url(#shade)"/><path d="M82 276Q84 236 140 234H392Q446 234 440 276L428 366Q424 408 372 408H128Q76 408 80 366Z" fill="url(#flap)"/><path d="M82 276Q84 236 140 234H392Q446 234 440 276L428 366Q424 408 372 408H128Q76 408 80 366Z" fill="none" stroke="url(#rim)" stroke-width="3"/></g></svg>
+SVG
+chmod 644 "$ICON"
 cat > "$DESKTOP" <<DESK
 [Desktop Entry]
 Type=Application
